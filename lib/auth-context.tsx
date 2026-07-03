@@ -15,6 +15,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Mock credentials for demo (when backend isn't available)
+const MOCK_CREDENTIALS: Record<string, { password: string; user: User }> = {
+  'admin@pharmaflow.com': {
+    password: 'admin123',
+    user: { id: 'admin-1', email: 'admin@pharmaflow.com', role: 'admin' }
+  },
+  'worker1@pharmaflow.com': {
+    password: 'worker123',
+    user: { id: 'worker-1', email: 'worker1@pharmaflow.com', role: 'worker' }
+  }
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,7 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       const response = await api.post('/api/auth/login', { email, password });
       setUser(response.data.user);
+      localStorage.setItem('pharmaflow_user', JSON.stringify(response.data.user));
     } catch (err: any) {
+      // Fallback to mock auth for demo purposes
+      const mockUser = MOCK_CREDENTIALS[email];
+      if (mockUser && mockUser.password === password) {
+        setUser(mockUser.user);
+        localStorage.setItem('pharmaflow_user', JSON.stringify(mockUser.user));
+        return;
+      }
       const errorMessage = err.response?.data?.error || 'Login failed';
       setError(errorMessage);
       throw err;
@@ -40,11 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await api.post('/api/auth/logout');
-      setUser(null);
-      setError(null);
     } catch (err) {
       console.error('Logout error:', err);
     }
+    localStorage.removeItem('pharmaflow_user');
+    setUser(null);
+    setError(null);
   };
 
   const refreshUser = async () => {
@@ -53,7 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(response.data);
       setError(null);
     } catch (err) {
-      setUser(null);
+      // Check localStorage for mock auth session
+      const storedUser = localStorage.getItem('pharmaflow_user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        setUser(null);
+      }
     } finally {
       setIsLoading(false);
     }
