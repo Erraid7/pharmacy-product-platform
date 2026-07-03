@@ -61,7 +61,7 @@ NODE_ENV=development
 
 4. **Seed database (optional)**
 ```bash
-npx ts-node scripts/seed.ts
+npm run seed
 ```
 
 This creates:
@@ -76,6 +76,16 @@ npm run dev
 ```
 
 The backend will run on `http://localhost:5000`
+
+## Deployment to Vercel with MongoDB Atlas
+
+### For Production/Cloud Deployment:
+
+See [SETUP_MONGODB.md](./SETUP_MONGODB.md) for detailed instructions on:
+1. Setting up MongoDB Atlas
+2. Adding `MONGODB_URI` environment variable to Vercel
+3. Running the seed script with your cloud database
+4. Deploying to Vercel
 
 ## Project Structure
 
