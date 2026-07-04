@@ -16,12 +16,14 @@ export async function loginController(req: Request, res: Response, next: NextFun
     const { token, user } = await login(validation.data);
 
     res.cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    console.log(res.getHeader("Set-Cookie"));
 
     res.json({ token, user });
   } catch (error) {
