@@ -1,104 +1,233 @@
-// app/%28auth%29/login/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff, Loader2, Pill } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+
+import { useAuth } from '@/lib/auth-context';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/lib/auth-context';
-import { toast } from 'sonner';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Email is required.')
+    .email('Please enter a valid email address.'),
+  password: z
+    .string()
+    .min(1, 'Password is required.')
+    .max(100),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+  const {
+    login,
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+    clearError,
+  } = useAuth();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    setFocus,
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
+  useEffect(() => {
+    setFocus('email');
+    clearError();
+  }, [setFocus, clearError]);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      router.replace('/needed');
+      router.refresh();
+    }
+  }, [authLoading, isAuthenticated, user, router]);
+
   const onSubmit = async (data: LoginFormData) => {
+    if (isSubmitting) return;
+
+    setServerError('');
+    setIsSubmitting(true);
+
     try {
-      setIsLoading(true);
       await login(data.email, data.password);
-      toast.success('Logged in successfully');
-      router.push('/needed');
+
+      toast.success('Welcome back!');
+
+      router.replace('/needed');
+      router.refresh();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Login failed');
+      const message =
+        error?.message ||
+        'Unable to sign in. Please verify your credentials.';
+
+      setServerError(message);
+      toast.error(message);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <Loader2 className="h-8 w-8 animate-spin text-cyan-600" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-lg p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">PharmaFlow</h1>
-            <p className="text-gray-500 mt-2">Pharmacy Management System</p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-cyan-50 px-6 py-12">
+
+      <div className="absolute inset-0">
+        <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-cyan-200/20 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-blue-200/20 blur-3xl" />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <div className="rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-2xl backdrop-blur">
+
+          <div className="mb-8 flex flex-col items-center">
+
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500 text-white shadow-lg">
+              <Pill size={30} />
+            </div>
+
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+              PharmaFlow
+            </h1>
+
+            <p className="mt-2 text-center text-sm text-slate-500">
+              Sign in to continue to your pharmacy workspace.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5"
+            noValidate
+          >
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
+
+              <Label htmlFor="email">
+                Email
+              </Label>
+
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@pharmaflow.com"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={isSubmitting}
+                placeholder="name@example.com"
                 {...register('email')}
-                disabled={isLoading}
                 className="h-11"
               />
+
               {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register('password')}
-                disabled={isLoading}
-                className="h-11"
-              />
+
+              <Label htmlFor="password">
+                Password
+              </Label>
+
+              <div className="relative">
+
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  disabled={isSubmitting}
+                  placeholder="Enter your password"
+                  {...register('password')}
+                  className="h-11 pr-11"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-800"
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
+                </button>
+
+              </div>
+
               {errors.password && (
-                <p className="text-red-500 text-sm">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full h-11 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition"
+            {serverError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {serverError}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={!isValid || isSubmitting}
+              className="h-11 w-full rounded-xl bg-cyan-600 font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </Button>
           </form>
 
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-gray-600 font-semibold mb-2">Demo Credentials:</p>
-            <div className="text-sm text-gray-600 space-y-1">
-              <p><span className="font-medium">Admin:</span> admin@pharmaflow.com / admin123</p>
-              <p><span className="font-medium">Worker:</span> worker1@pharmaflow.com / worker123</p>
-            </div>
-          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

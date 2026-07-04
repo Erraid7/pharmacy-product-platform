@@ -1,85 +1,173 @@
-// lib/auth-context.tsx
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '@/types';
-import api from './api';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
+import type { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const USER_STORAGE_KEY = 'pharmaflow_user';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    refreshUser();
+  const clearError = useCallback(() => {
+    setError(null);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const refreshUser = useCallback(async () => {
     try {
-      setError(null);
-      const response = await api.post('/api/auth/login', { email, password });
-      setUser(response.data.user);
-      localStorage.setItem('pharmaflow_user', JSON.stringify(response.data.user));
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Login failed';
-      setError(errorMessage);
-      throw err;
-    }
-  };
+      const { data } = await api.get<User>('/api/auth/me');
 
-  const logout = async () => {
+      setUser(data);
+      setError(null);
+
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data));
+    } catch (err: any) {
+      setUser(null);
+      localStorage.removeItem(USER_STORAGE_KEY);
+
+      if (err?.response?.status !== 401) {
+        setError(
+          err?.response?.data?.error ??
+            err?.response?.data?.message ??
+            'Unable to verify your session.'
+        );
+      }
+    }
+  }, []);
+
+  const login = useCallback(
+    async (email: string, password: string): Promise<User> => {
+      try {
+        setError(null);
+
+        const response = await api.post('/api/auth/login', {
+          email,
+          password,
+        });
+
+        /**
+         * The backend sets the HttpOnly cookie.
+         * We immediately fetch /me to ensure the cookie
+         * is accepted and the authenticated user is loaded.
+         */
+
+        const me = await api.get<User>('/api/auth/me');
+
+        setUser(me.data);
+
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(me.data));
+
+        return me.data;
+      } catch (err: any) {
+        setUser(null);
+        localStorage.removeItem(USER_STORAGE_KEY);
+
+        const message =
+          err?.response?.data?.error ??
+          err?.response?.data?.message ??
+          'Login failed.';
+
+        setError(message);
+
+        throw new Error(message);
+      }
+    },
+    []
+  );
+
+  const logout = useCallback(async () => {
     try {
       await api.post('/api/auth/logout');
-    } catch (err) {
-      console.error('Logout error:', err);
+    } catch (_) {
+      // ignore backend logout errors
     }
-    localStorage.removeItem('pharmaflow_user');
+
+    localStorage.removeItem(USER_STORAGE_KEY);
+
     setUser(null);
     setError(null);
-  };
 
-  const refreshUser = async () => {
-    try {
-      const response = await api.get('/api/auth/me');
-      setUser(response.data);
-      setError(null);
-    } catch (err) {
-      // Check localStorage for mock auth session
-      const storedUser = localStorage.getItem('pharmaflow_user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      } else {
-        setUser(null);
+    router.replace('/login');
+    router.refresh();
+  }, [router]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const initialize = async () => {
+      try {
+        await refreshUser();
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  return (
-    <AuthContext.Provider value={{ user, isLoading, error, login, logout, refreshUser }}>
-      {children}
-    </AuthContext.Provider>
+    initialize();
+
+    return () => {
+      mounted = false;
+    };
+  }, [refreshUser]);
+
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated: !!user,
+      error,
+      login,
+      logout,
+      refreshUser,
+      clearError,
+    }),
+    [
+      user,
+      isLoading,
+      error,
+      login,
+      logout,
+      refreshUser,
+      clearError,
+    ]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+
   return context;
 }
