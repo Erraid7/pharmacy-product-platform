@@ -1,3 +1,4 @@
+// types/index.ts
 export type UserRole = 'worker' | 'admin';
 
 export interface User {

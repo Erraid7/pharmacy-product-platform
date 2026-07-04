@@ -1,24 +1,35 @@
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// lib/api.ts
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
-// Add request interceptor for error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized - redirect to login happens in middleware
+api.interceptors.request.use((config) => {
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("pharmaflow_token");
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
-    return Promise.reject(error);
-  }
+
+    return config;
+});
+
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem("pharmaflow_token");
+            localStorage.removeItem("pharmaflow_user");
+        }
+
+        return Promise.reject(error);
+    }
 );
 
 export default api;

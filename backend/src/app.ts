@@ -10,6 +10,8 @@ import { errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 // Security middleware
 app.use(helmet());
 
@@ -44,7 +46,7 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // cors commented intentionally for development purposes. Uncomment in production.
 
 // Body parsing
 app.use(express.json());
