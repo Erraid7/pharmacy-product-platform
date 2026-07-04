@@ -18,10 +18,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   process.env.FRONTEND_URL,
-  // Vercel deployment URLs (both with and without trailing slash)
   'https://pharmacy-product-platform.vercel.app',
   'https://pharmacy-product-platform.vercel.app/',
-].filter(Boolean);
+].filter((origin): origin is string => Boolean(origin));
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
