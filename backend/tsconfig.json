@@ -4,25 +4,20 @@
     "module": "ES2020",
     "lib": ["ES2020"],
     "moduleResolution": "bundler",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "rootDir": "./",
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
+
     "sourceMap": true
   },
-  "ts-node": {
-    "esm": true,
-    "experimentalEsm": true,
-    "compilerOptions": {
-      "module": "ES2020"
-    }
-  },
-  "include": ["src/**/*", "scripts/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
