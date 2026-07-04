@@ -9,8 +9,6 @@ __v0_jsx-dev-runtime.ts
 # Environment variables
 .env*.local
 
-# dist folder in backend
-dist/
 
 # Common ignores
 node_modules
