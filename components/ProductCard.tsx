@@ -2,8 +2,17 @@
 
 import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Trash2, Edit, Check } from 'lucide-react';
+import {
+  Trash2,
+  Edit3,
+  Check,
+  Undo2,
+  Package,
+  User,
+  Clock3,
+} from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { motion } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
@@ -27,91 +36,213 @@ export function ProductCard({
   isLoading = false,
 }: ProductCardProps) {
   const isOrdered = product.status === 'ordered';
-  const timeAgo = formatDistanceToNow(new Date(product.createdAt), { addSuffix: true });
+
+  const createdAgo = formatDistanceToNow(
+    new Date(product.createdAt),
+    { addSuffix: true }
+  );
 
   return (
-    <div
-      className={`p-4 rounded-xl border-2 transition-all ${
-        isOrdered
-          ? 'border-green-200 bg-green-50'
-          : 'border-orange-200 bg-orange-50'
-      }`}
+    <motion.article
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.2 }}
+      className="
+        group
+        overflow-hidden
+        rounded-3xl
+        border
+        border-slate-200
+        bg-white
+        shadow-sm
+        transition-all
+        hover:border-cyan-200
+        hover:shadow-xl
+      "
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 text-lg">{product.name}</h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Added by <span className="font-medium">{product.createdBy.email}</span>
-          </p>
-          <p className="text-xs text-gray-500 mt-1">{timeAgo}</p>
-        </div>
-        <div
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            isOrdered
-              ? 'bg-green-200 text-green-800'
-              : 'bg-orange-200 text-orange-800'
-          }`}
-        >
-          {isOrdered ? 'Ordered' : 'Needed'}
-        </div>
-      </div>
+      {/* Colored top border */}
+      <div
+        className={`h-1 w-full ${
+          isOrdered
+            ? 'bg-emerald-500'
+            : 'bg-cyan-500'
+        }`}
+      />
 
-      {isOrdered && product.orderedBy && (
-        <p className="text-sm text-gray-600 mb-3">
-          Ordered by <span className="font-medium">{product.orderedBy.email}</span>
-        </p>
-      )}
+      <div className="p-5">
 
-      <div className="flex gap-2 flex-wrap">
-        {isOwner && !isOrdered && (
-          <>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onEdit}
-              disabled={isLoading}
-              className="text-gray-700 border-gray-300 hover:bg-gray-100"
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4">
+
+          <div className="flex min-w-0 gap-4">
+
+            <div
+              className={`
+                flex
+                h-12
+                w-12
+                shrink-0
+                items-center
+                justify-center
+                rounded-2xl
+                ${
+                  isOrdered
+                    ? 'bg-emerald-100 text-emerald-600'
+                    : 'bg-cyan-100 text-cyan-600'
+                }
+              `}
             >
-              <Edit className="w-4 h-4 mr-1" />
-              Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onDelete}
-              disabled={isLoading}
-              className="text-red-600 border-red-300 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Delete
-            </Button>
-          </>
+              <Package className="h-6 w-6" />
+            </div>
+
+            <div className="min-w-0">
+
+              <h3 className="truncate text-lg font-semibold text-slate-900">
+                {product.name}
+              </h3>
+
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+
+                <span className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  {product.createdBy.email}
+                </span>
+
+                <span className="flex items-center gap-1">
+                  <Clock3 className="h-4 w-4" />
+                  {createdAgo}
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <span
+            className={`
+              rounded-full
+              px-3
+              py-1
+              text-xs
+              font-semibold
+              whitespace-nowrap
+              ${
+                isOrdered
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-cyan-100 text-cyan-700'
+              }
+            `}
+          >
+            {isOrdered ? 'Ordered' : 'Needed'}
+          </span>
+
+        </div>
+
+        {/* Ordered By */}
+        {isOrdered && product.orderedBy && (
+          <div
+            className="
+              mt-5
+              rounded-2xl
+              border
+              border-emerald-100
+              bg-emerald-50
+              px-4
+              py-3
+            "
+          >
+            <p className="text-sm text-emerald-800">
+              <span className="font-semibold">
+                Ordered by
+              </span>{' '}
+              {product.orderedBy.email}
+            </p>
+          </div>
         )}
 
-        {isAdmin && (
-          isOrdered ? (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onUnorder}
-              disabled={isLoading}
-              className="text-green-600 border-green-300 hover:bg-green-50"
-            >
-              Move Back to Needed
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              onClick={onOrder}
-              disabled={isLoading}
-              className="bg-green-500 hover:bg-green-600 text-white"
-            >
-              <Check className="w-4 h-4 mr-1" />
-              Mark Ordered
-            </Button>
-          )
-        )}
+        {/* Divider */}
+        <div className="my-5 border-t border-slate-100" />
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-2">
+
+          {isOwner && !isOrdered && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                disabled={isLoading}
+                className="
+                  rounded-xl
+                  border-slate-200
+                  hover:border-cyan-300
+                  hover:bg-cyan-50
+                "
+              >
+                <Edit3 className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDelete}
+                disabled={isLoading}
+                className="
+                  rounded-xl
+                  border-red-200
+                  text-red-600
+                  hover:border-red-300
+                  hover:bg-red-50
+                "
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </>
+          )}
+
+          {isAdmin &&
+            (isOrdered ? (
+              <Button
+                onClick={onUnorder}
+                disabled={isLoading}
+                variant="outline"
+                size="sm"
+                className="
+                  ml-auto
+                  rounded-xl
+                  border-emerald-200
+                  text-emerald-700
+                  hover:bg-emerald-50
+                "
+              >
+                <Undo2 className="mr-2 h-4 w-4" />
+                Move Back
+              </Button>
+            ) : (
+              <Button
+                onClick={onOrder}
+                disabled={isLoading}
+                size="sm"
+                className="
+                  ml-auto
+                  rounded-xl
+                  bg-cyan-600
+                  text-white
+                  shadow-sm
+                  hover:bg-cyan-700
+                "
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Mark Ordered
+              </Button>
+            ))}
+
+        </div>
+
       </div>
-    </div>
+    </motion.article>
   );
 }

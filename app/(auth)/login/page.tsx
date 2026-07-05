@@ -5,7 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Loader2, Pill } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Pill,
+  ShieldCheck,
+  Package,
+  Sparkles,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -97,137 +105,420 @@ export default function LoginPage() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-cyan-600" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-950">
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          className="flex flex-col items-center gap-5"
+        >
+          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-cyan-500 to-sky-600 shadow-2xl">
+            <Pill className="h-10 w-10 text-white" />
+          </div>
+
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+
+          <p className="text-sm text-slate-400">
+            Loading PharmaFlow...
+          </p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-linear-to-br from-slate-50 via-white to-cyan-50 px-6 py-12">
+    <div className="relative flex min-h-screen overflow-hidden bg-slate-950">
 
-      <div className="absolute inset-0">
-        <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-cyan-200/20 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-blue-200/20 blur-3xl" />
+      {/* ================= Background ================= */}
+
+      <div className="absolute inset-0 overflow-hidden">
+
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#0891b255,transparent_35%),radial-gradient(circle_at_bottom_right,#2563eb33,transparent_35%)]" />
+
+        <motion.div
+          animate={{
+            x: [0, 40, -20, 0],
+            y: [0, -25, 20, 0],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 18,
+            ease: 'linear',
+          }}
+          className="absolute -left-32 -top-32 h-[420px] w-[420px] rounded-full bg-cyan-500/20 blur-[130px]"
+        />
+
+        <motion.div
+          animate={{
+            x: [0, -30, 20, 0],
+            y: [0, 25, -20, 0],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 22,
+            ease: 'linear',
+          }}
+          className="absolute -right-32 bottom-0 h-[420px] w-[420px] rounded-full bg-blue-600/20 blur-[140px]"
+        />
+
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px]" />
+
       </div>
 
+      {/* ================= Left Branding ================= */}
+
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="relative z-10 w-full max-w-md"
+        initial={{ opacity: 0, x: -40 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative hidden flex-1 xl:flex"
       >
-        <div className="rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-2xl backdrop-blur">
+        <div className="flex max-w-xl flex-col justify-center px-20">
 
-          <div className="mb-8 flex flex-col items-center">
+          <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-cyan-500 to-sky-600 shadow-[0_20px_70px_rgba(6,182,212,0.35)]">
 
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500 text-white shadow-lg">
-              <Pill size={30} />
-            </div>
+            <Pill className="h-12 w-12 text-white" />
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              PharmaFlow
-            </h1>
-
-            <p className="mt-2 text-center text-sm text-slate-500">
-              Sign in to continue to your pharmacy workspace.
-            </p>
           </div>
 
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-5"
-            noValidate
-          >
-            <div className="space-y-2">
+          <span className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-300">
 
-              <Label htmlFor="email">
-                Email
-              </Label>
+            <Sparkles className="h-4 w-4" />
 
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                disabled={isSubmitting}
-                placeholder="name@example.com"
-                {...register('email')}
-                className="h-11"
-              />
+            Pharmacy Management Platform
 
-              {errors.email && (
-                <p className="text-sm text-red-500">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
+          </span>
 
-            <div className="space-y-2">
+          <h1 className="text-6xl font-black leading-tight tracking-tight text-white">
 
-              <Label htmlFor="password">
-                Password
-              </Label>
+            PharmaFlow
 
-              <div className="relative">
+          </h1>
 
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  disabled={isSubmitting}
-                  placeholder="Enter your password"
-                  {...register('password')}
-                  className="h-11 pr-11"
-                />
+          <p className="mt-8 text-xl leading-9 text-slate-300">
 
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-800"
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
+            A modern collaborative workspace that helps pharmacy teams
+            organize needed products, manage orders, and streamline
+            inventory in one secure platform.
+
+          </p>
+
+          <div className="mt-14 space-y-5">
+
+            <div className="flex items-center gap-4 text-slate-200">
+
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/15">
+
+                <Package className="h-5 w-5 text-cyan-400" />
 
               </div>
 
-              {errors.password && (
-                <p className="text-sm text-red-500">
-                  {errors.password.message}
+              <div>
+                <h3 className="font-semibold">
+                  Product Tracking
+                </h3>
+
+                <p className="text-sm text-slate-400">
+                  Organize needed and ordered products effortlessly.
                 </p>
-              )}
+              </div>
+
             </div>
 
-            {serverError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {serverError}
-              </div>
-            )}
+            <div className="flex items-center gap-4 text-slate-200">
 
-            <Button
-              type="submit"
-              disabled={!isValid || isSubmitting}
-              className="h-11 w-full rounded-xl bg-cyan-600 font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </Button>
-          </form>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/15">
+
+                <ShieldCheck className="h-5 w-5 text-emerald-400" />
+
+              </div>
+
+              <div>
+                <h3 className="font-semibold">
+                  Secure Access
+                </h3>
+
+                <p className="text-sm text-slate-400">
+                  Protected authentication with role-based permissions.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
 
         </div>
       </motion.div>
+            {/* ================= Login Card ================= */}
+
+      <div className="relative z-10 flex w-full items-center justify-center px-6 py-12 lg:w-[42%]">
+
+        <motion.div
+          initial={{ opacity: 0, y: 35, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{
+            duration: 0.45,
+            ease: 'easeOut',
+          }}
+          className="w-full max-w-md"
+        >
+          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/90 shadow-[0_30px_80px_rgba(15,23,42,.28)] backdrop-blur-2xl">
+
+            {/* Top Accent */}
+
+            <div className="h-2 w-full bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600" />
+
+            <div className="p-8 sm:p-10">
+
+              {/* Mobile Logo */}
+
+              <div className="mb-8 flex flex-col items-center xl:hidden">
+
+                <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-[1.6rem] bg-gradient-to-br from-cyan-500 to-sky-600 shadow-xl">
+
+                  <Pill className="h-10 w-10 text-white" />
+
+                </div>
+
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">
+                  PharmaFlow
+                </h1>
+
+                <p className="mt-2 text-center text-sm text-slate-500">
+                  Pharmacy Product Management Platform
+                </p>
+
+              </div>
+
+              {/* Desktop Title */}
+
+              <div className="mb-8 hidden xl:block">
+
+                <span className="inline-flex items-center rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-700">
+
+                  Welcome Back
+
+                </span>
+
+                <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-900">
+
+                  Sign In
+
+                </h2>
+
+                <p className="mt-3 text-slate-500">
+
+                  Enter your credentials to continue managing your pharmacy.
+
+                </p>
+
+              </div>
+
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
+                className="space-y-6"
+              >
+
+                {/* Email */}
+
+                <div className="space-y-2">
+
+                  <Label
+                    htmlFor="email"
+                    className="font-semibold text-slate-700"
+                  >
+                    Email Address
+                  </Label>
+
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    disabled={isSubmitting}
+                    placeholder="name@example.com"
+                    {...register('email')}
+                    className="h-12 rounded-xl border-slate-200 bg-white transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+                  />
+
+                  {errors.email && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm font-medium text-red-500"
+                    >
+                      {errors.email.message}
+                    </motion.p>
+                  )}
+
+                </div>
+
+                {/* Password */}
+
+                <div className="space-y-2">
+
+                  <Label
+                    htmlFor="password"
+                    className="font-semibold text-slate-700"
+                  >
+                    Password
+                  </Label>
+
+                  <div className="relative">
+
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      disabled={isSubmitting}
+                      placeholder="Enter your password"
+                      {...register('password')}
+                      className="h-12 rounded-xl border-slate-200 pr-12 transition-all focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPassword((v) => !v)
+                      }
+                      className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-cyan-600"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+
+                  </div>
+
+                  {errors.password && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm font-medium text-red-500"
+                    >
+                      {errors.password.message}
+                    </motion.p>
+                  )}
+
+                </div>
+
+                {serverError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
+                  >
+                    {serverError}
+                  </motion.div>
+                )}
+                                <Button
+                  type="submit"
+                  disabled={!isValid || isSubmitting}
+                  className="group h-13 w-full rounded-2xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 text-base font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-cyan-500/30"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Signing In...
+                    </>
+                  ) : (
+                    <>
+                      Sign In
+
+                      <motion.span
+                        className="ml-2"
+                        initial={{ x: 0 }}
+                        whileHover={{ x: 4 }}
+                        transition={{
+                          duration: 0.2,
+                        }}
+                      >
+                        →
+                      </motion.span>
+                    </>
+                  )}
+                </Button>
+
+              </form>
+
+              {/* Divider */}
+
+              <div className="my-8 flex items-center">
+
+                <div className="h-px flex-1 bg-slate-200" />
+
+                <span className="px-4 text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  Secure Authentication
+                </span>
+
+                <div className="h-px flex-1 bg-slate-200" />
+
+              </div>
+
+              {/* Features */}
+
+              <div className="grid grid-cols-3 gap-3">
+
+                <div className="rounded-2xl bg-slate-50 p-4 text-center transition hover:bg-cyan-50">
+
+                  <ShieldCheck className="mx-auto mb-2 h-6 w-6 text-cyan-600" />
+
+                  <p className="text-xs font-semibold text-slate-600">
+                    Protected
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 p-4 text-center transition hover:bg-cyan-50">
+
+                  <Package className="mx-auto mb-2 h-6 w-6 text-cyan-600" />
+
+                  <p className="text-xs font-semibold text-slate-600">
+                    Inventory
+                  </p>
+
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 p-4 text-center transition hover:bg-cyan-50">
+
+                  <Sparkles className="mx-auto mb-2 h-6 w-6 text-cyan-600" />
+
+                  <p className="text-xs font-semibold text-slate-600">
+                    Modern UI
+                  </p>
+
+                </div>
+
+              </div>
+
+              {/* Footer */}
+
+              <div className="mt-10 border-t border-slate-200 pt-6">
+
+                <p className="text-center text-sm text-slate-500">
+                  PharmaFlow
+                  <span className="mx-2 text-slate-300">•</span>
+                  Pharmacy Product Management Platform
+                </p>
+
+                <p className="mt-2 text-center text-xs text-slate-400">
+                  Built for fast and collaborative pharmacy teams.
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </motion.div>
+
+      </div>
+
     </div>
   );
 }

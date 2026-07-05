@@ -1,16 +1,22 @@
-// app/%28app%29/users/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Users, Trash2, Shield, User as UserIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
+
 import { useAuth } from '@/lib/auth-context';
-import { useUsers, useCreateUser, useDeleteUser } from '@/lib/queries';
+import {
+  useUsers,
+  useCreateUser,
+  useDeleteUser,
+} from '@/lib/queries';
+
+import { PageHeader } from '@/components/PageHeader';
 import { UserForm } from '@/components/UserForm';
 import { EmptyState } from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
-import { Plus, Users, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { motion } from 'framer-motion';
-import { formatDistanceToNow } from 'date-fns';
 
 interface User {
   _id: string;
@@ -21,108 +27,155 @@ interface User {
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
+
   const { data: users, isLoading } = useUsers();
-  const [formOpen, setFormOpen] = useState(false);
+
   const createMutation = useCreateUser();
   const deleteMutation = useDeleteUser();
 
-  const handleCreateUser = async (data: any) => {
-    try {
-      await createMutation.mutateAsync(data);
-      toast.success('User created successfully');
-      setFormOpen(false);
-    } catch (error) {
-      throw error;
-    }
-  };
+  const [search, setSearch] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
 
-  const handleDelete = async (id: string, email: string) => {
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+
+    return (users as User[]).filter((user) =>
+      user.email.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [users, search]);
+
+  async function handleCreateUser(data: any) {
+    await createMutation.mutateAsync(data);
+
+    toast.success('User created successfully');
+
+    setFormOpen(false);
+  }
+
+  async function handleDelete(id: string, email: string) {
     if (id === currentUser?._id) {
-      toast.error('Cannot delete your own account');
+      toast.error("You can't delete your own account.");
       return;
     }
 
-    if (confirm(`Are you sure you want to delete ${email}?`)) {
-      try {
-        await deleteMutation.mutateAsync(id);
-        toast.success('User deleted');
-      } catch (error) {
-        toast.error('Failed to delete user');
-      }
-    }
-  };
+    if (!confirm(`Delete ${email}?`)) return;
+
+    await deleteMutation.mutateAsync(id);
+
+    toast.success('User deleted');
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="p-4 md:p-6 max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-500 mt-1">Manage pharmacy staff accounts</p>
-        </div>
-      </div>
+    <>
+      <PageHeader
+        title="Users"
+        subtitle={`${filteredUsers.length} registered ${
+          filteredUsers.length === 1 ? 'user' : 'users'
+        }`}
+        count={filteredUsers.length}
+        icon={Users}
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search users..."
+        actionLabel="Add User"
+        onAction={() => setFormOpen(true)}
+      />
 
-      {/* Content */}
-      <div className="p-4 md:p-6 max-w-6xl mx-auto pb-24 md:pb-6">
+      <div className="mx-auto max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:px-8">
         {isLoading ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 bg-white rounded-lg animate-pulse border border-gray-200"></div>
+          <div className="space-y-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-24 animate-pulse rounded-2xl border bg-white"
+              />
             ))}
           </div>
-        ) : !users || users.length === 0 ? (
+        ) : filteredUsers.length === 0 ? (
           <EmptyState
             icon={Users}
-            title="No users"
-            description="Create a new user to get started"
+            title="No users found"
+            description={
+              search
+                ? 'No users match your search.'
+                : 'Create your first user to start collaborating.'
+            }
             action={{
               label: 'Create User',
               onClick: () => setFormOpen(true),
             }}
           />
         ) : (
-          <div className="space-y-3">
-            {(users as User[]).map((user, index) => (
+          <div className="space-y-4">
+            {filteredUsers.map((user, index) => (
               <motion.div
                 key={user._id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between hover:shadow-md transition"
+                transition={{ delay: index * 0.04 }}
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                      <span className="text-cyan-700 font-semibold text-sm">
-                        {user.email.charAt(0).toUpperCase()}
-                      </span>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                        user.role === 'admin'
+                          ? 'bg-cyan-100'
+                          : 'bg-slate-100'
+                      }`}
+                    >
+                      {user.role === 'admin' ? (
+                        <Shield className="h-5 w-5 text-cyan-700" />
+                      ) : (
+                        <UserIcon className="h-5 w-5 text-slate-600" />
+                      )}
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{user.email}</p>
-                      <p className="text-sm text-gray-500">
-                        {user.role === 'admin' ? 'Administrator' : 'Worker'} • Added {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
+
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold text-slate-900">
+                        {user.email}
+                      </h3>
+
+                      <p className="mt-1 text-sm text-slate-500">
+                        Created{' '}
+                        {formatDistanceToNow(
+                          new Date(user.createdAt),
+                          {
+                            addSuffix: true,
+                          }
+                        )}
                       </p>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    user.role === 'admin'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {user.role === 'admin' ? 'Admin' : 'Worker'}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(user._id, user.email)}
-                    disabled={deleteMutation.isPending || user._id === currentUser?._id}
-                    className="text-red-600 border-red-300 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        user.role === 'admin'
+                          ? 'bg-cyan-100 text-cyan-700'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {user.role === 'admin'
+                        ? 'Administrator'
+                        : 'Worker'}
+                    </span>
+
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      disabled={
+                        deleteMutation.isPending ||
+                        user._id === currentUser?._id
+                      }
+                      onClick={() =>
+                        handleDelete(user._id, user.email)
+                      }
+                      className="rounded-xl border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -130,22 +183,12 @@ export default function UsersPage() {
         )}
       </div>
 
-      {/* Floating Action Button */}
-      <Button
-        onClick={() => setFormOpen(true)}
-        size="lg"
-        className="fixed bottom-24 md:bottom-6 right-4 md:right-6 bg-cyan-500 hover:bg-cyan-600 text-white rounded-full w-14 h-14 shadow-lg flex items-center justify-center"
-      >
-        <Plus className="w-6 h-6" />
-      </Button>
-
-      {/* Add User Form */}
       <UserForm
         open={formOpen}
         onOpenChange={setFormOpen}
         onSubmit={handleCreateUser}
         isLoading={createMutation.isPending}
       />
-    </div>
+    </>
   );
 }

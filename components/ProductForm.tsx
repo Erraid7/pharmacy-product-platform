@@ -1,18 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import {
+  Package2,
+  Loader2,
+  Sparkles,
+} from 'lucide-react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
-import { toast } from 'sonner';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from '@/components/ui/sheet';
 
 const productSchema = z.object({
-  name: z.string().min(1, 'Product name is required').max(255),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Product name is required')
+    .max(255),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -21,7 +47,9 @@ interface ProductFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: ProductFormData) => Promise<void>;
-  initialData?: { name: string };
+  initialData?: {
+    name: string;
+  };
   isLoading?: boolean;
   isMobile?: boolean;
 }
@@ -34,10 +62,28 @@ export function ProductForm({
   isLoading = false,
   isMobile = false,
 }: ProductFormProps) {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<ProductFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setFocus,
+    formState: { errors, isDirty },
+  } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
-    defaultValues: initialData || { name: '' },
+    defaultValues: initialData || {
+      name: '',
+    },
   });
+
+  useEffect(() => {
+    if (open) {
+      reset(initialData || { name: '' });
+
+      setTimeout(() => {
+        setFocus('name');
+      }, 150);
+    }
+  }, [open, initialData, reset, setFocus]);
 
   const onFormSubmit = async (data: ProductFormData) => {
     try {
@@ -45,60 +91,148 @@ export function ProductForm({
       reset();
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'An error occurred');
+      toast.error(
+        error?.response?.data?.error ??
+          'Something went wrong.'
+      );
     }
   };
 
-  const content = (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+  const form = (
+    <form
+      onSubmit={handleSubmit(onFormSubmit)}
+      className="space-y-6 pt-4"
+    >
       <div className="space-y-2">
-        <Label htmlFor="name" className="text-gray-700 font-medium">Product Name</Label>
-        <Input
-          id="name"
-          placeholder="e.g., Paracetamol 500mg"
-          {...register('name')}
-          disabled={isLoading}
-          className="h-11"
-        />
+
+        <Label
+          htmlFor="name"
+          className="text-sm font-semibold text-slate-700"
+        >
+          Product name
+        </Label>
+
+        <div className="relative">
+
+          <Package2
+            className="
+              absolute
+              left-4
+              top-1/2
+              h-5
+              w-5
+              -translate-y-1/2
+              text-slate-400
+            "
+          />
+
+          <Input
+            id="name"
+            placeholder="Paracetamol 500mg"
+            disabled={isLoading}
+            {...register('name')}
+            className="
+              h-12
+              rounded-2xl
+              border-slate-200
+              bg-slate-50
+              pl-12
+              shadow-sm
+              transition-all
+              focus:border-cyan-500
+              focus:bg-white
+              focus:ring-4
+              focus:ring-cyan-100
+            "
+          />
+
+        </div>
+
         {errors.name && (
-          <p className="text-red-500 text-sm">{errors.name.message}</p>
+          <p className="text-sm text-red-500">
+            {errors.name.message}
+          </p>
         )}
+
+        <p className="text-xs text-slate-500">
+          Example: Ibuprofen 400mg, Vitamin C,
+          Aspirin...
+        </p>
+
       </div>
 
       {isMobile ? (
-        <SheetFooter className="flex-row gap-2 mt-6">
+        <SheetFooter className="mt-8 flex-row gap-3">
+
           <Button
             type="button"
             variant="outline"
+            className="flex-1 rounded-xl"
             onClick={() => onOpenChange(false)}
-            className="flex-1"
+            disabled={isLoading}
           >
             Cancel
           </Button>
+
           <Button
             type="submit"
-            disabled={isLoading}
-            className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white"
+            disabled={!isDirty || isLoading}
+            className="
+              flex-1
+              rounded-xl
+              bg-cyan-600
+              hover:bg-cyan-700
+            "
           >
-            {isLoading ? 'Saving...' : 'Add Product'}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                {initialData ? 'Save' : 'Add'}
+              </>
+            )}
           </Button>
+
         </SheetFooter>
       ) : (
-        <DialogFooter className="gap-2 mt-6">
+        <DialogFooter className="mt-8 gap-3">
+
           <Button
             type="button"
             variant="outline"
+            className="rounded-xl"
             onClick={() => onOpenChange(false)}
+            disabled={isLoading}
           >
             Cancel
           </Button>
+
           <Button
             type="submit"
-            disabled={isLoading}
-            className="bg-cyan-500 hover:bg-cyan-600 text-white"
+            disabled={!isDirty || isLoading}
+            className="
+              rounded-xl
+              bg-cyan-600
+              hover:bg-cyan-700
+            "
           >
-            {isLoading ? 'Saving...' : 'Add Product'}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                {initialData ? 'Save Changes' : 'Add Product'}
+              </>
+            )}
           </Button>
+
         </DialogFooter>
       )}
     </form>
@@ -106,26 +240,76 @@ export function ProductForm({
 
   if (isMobile) {
     return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
+      <Sheet
+        open={open}
+        onOpenChange={onOpenChange}
+      >
+        <SheetContent
+          side="bottom"
+          className="
+            rounded-t-3xl
+            border-0
+            px-6
+            pb-8
+          "
+        >
           <SheetHeader>
-            <SheetTitle>Add Product</SheetTitle>
+
+            <div
+              className="
+                mx-auto
+                mb-3
+                h-1.5
+                w-14
+                rounded-full
+                bg-slate-300
+              "
+            />
+
+            <SheetTitle className="text-left text-xl">
+              {initialData
+                ? 'Edit Product'
+                : 'New Product'}
+            </SheetTitle>
+
+            <SheetDescription className="text-left">
+              Add a product to the pharmacy needed
+              list.
+            </SheetDescription>
+
           </SheetHeader>
-          <div className="mt-4">
-            {content}
-          </div>
+
+          {form}
+
         </SheetContent>
       </Sheet>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <DialogContent className="rounded-3xl">
+
         <DialogHeader>
-          <DialogTitle>Add Product</DialogTitle>
+
+          <DialogTitle className="text-2xl">
+            {initialData
+              ? 'Edit Product'
+              : 'Add Product'}
+          </DialogTitle>
+
+          <DialogDescription>
+            Create a new product that your team
+            needs to order.
+          </DialogDescription>
+
         </DialogHeader>
-        {content}
+
+        {form}
+
       </DialogContent>
     </Dialog>
   );

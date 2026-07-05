@@ -1,9 +1,11 @@
 'use client';
 
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 
 interface EmptyStateProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   title: string;
   description: string;
   action?: {
@@ -12,22 +14,68 @@ interface EmptyStateProps {
   };
 }
 
-export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+}: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <Icon className="w-8 h-8 text-gray-400" />
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="flex flex-col items-center justify-center py-20 text-center"
+    >
+      <div
+        className="
+          relative
+          mb-8
+          flex
+          h-24
+          w-24
+          items-center
+          justify-center
+          rounded-3xl
+          bg-gradient-to-br
+          from-cyan-50
+          to-blue-50
+          shadow-sm
+        "
+      >
+        <div className="absolute inset-0 rounded-3xl border border-cyan-100" />
+
+        {Icon ? (
+          <Icon className="h-10 w-10 text-cyan-600" />
+        ) : (
+          <div className="h-10 w-10 rounded-full bg-cyan-100 p-2">
+            <Search className="h-6 w-6 text-cyan-600" />
+          </div>
+        )}
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-gray-500 text-center mb-6 max-w-sm">{description}</p>
+
+      <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+        {title}
+      </h2>
+
+      <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">
+        {description}
+      </p>
+
       {action && (
-        <button
+        <Button
           onClick={action.onClick}
-          className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition"
+          className="
+            mt-8
+            rounded-xl
+            bg-cyan-600
+            px-6
+            hover:bg-cyan-700
+          "
         >
           {action.label}
-        </button>
+        </Button>
       )}
-    </div>
+    </motion.div>
   );
 }
