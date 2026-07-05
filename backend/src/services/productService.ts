@@ -105,3 +105,12 @@ export async function unorderProduct(productId: string) {
     .populate('createdBy', 'email')
     .populate('orderedBy', 'email');
 }
+
+export async function bulkDeleteProducts(ids: string[]) {
+  if (!ids.length) {
+    throw createError('No product ids provided', 400);
+  }
+
+  const result = await ProductModel.deleteMany({ _id: { $in: ids } });
+  return { deletedCount: result.deletedCount };
+}

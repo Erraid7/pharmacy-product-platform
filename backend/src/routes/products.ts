@@ -7,6 +7,7 @@ import {
   deleteProductController,
   orderProductController,
   unorderProductController,
+  bulkDeleteProductsController,
 } from '../controllers/productController.js';
 import { authMiddleware, adminMiddleware } from '../middlewares/auth.js';
 
@@ -27,7 +28,10 @@ router.post('/', createProductController);
 // PUT update product (owner or admin)
 router.put('/:id', updateProductController);
 
-// DELETE product (owner only)
+// DELETE bulk delete products (admin only)
+router.delete('/bulk', adminMiddleware, bulkDeleteProductsController);
+
+// DELETE product (owner or admin)
 router.delete('/:id', deleteProductController);
 
 // POST order product (admin only)

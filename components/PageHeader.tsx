@@ -21,6 +21,7 @@ interface PageHeaderProps {
 
   actionLabel?: string;
   onAction?: () => void;
+  actionIcon?: LucideIcon; // new, defaults to Plus
 }
 
 export function PageHeader({
@@ -35,6 +36,7 @@ export function PageHeader({
   isRefreshing = false,
   actionLabel,
   onAction,
+  actionIcon: ActionIcon = Plus,
 }: PageHeaderProps) {
   return (
     <>
@@ -79,7 +81,7 @@ export function PageHeader({
                   onClick={onAction}
                   className="h-11 rounded-xl bg-cyan-600 px-5 shadow-lg shadow-cyan-500/20 hover:bg-cyan-700"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
+                  <ActionIcon className="h-6 w-6" />
                   {actionLabel}
                 </Button>
               )}
@@ -117,7 +119,7 @@ export function PageHeader({
           size="icon"
           className="fixed bottom-24 right-5 z-40 h-14 w-14 rounded-full bg-cyan-600 shadow-xl shadow-cyan-500/30 transition-transform duration-150 hover:bg-cyan-700 active:scale-90 md:hidden"
         >
-          <Plus className="h-6 w-6" />
+          <ActionIcon className="h-6 w-6" />
         </Button>
       )}
     </>

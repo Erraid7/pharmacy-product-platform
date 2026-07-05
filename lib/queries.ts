@@ -141,3 +141,16 @@ export function useDeleteUser() {
     },
   });
 }
+
+export function useBulkDeleteProducts() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const response = await api.delete('/api/products/bulk', { data: { ids } });
+      return response.data as { deletedCount: number };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+}

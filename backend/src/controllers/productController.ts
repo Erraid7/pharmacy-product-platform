@@ -7,8 +7,10 @@ import {
   deleteProduct,
   orderProduct,
   unorderProduct,
+  bulkDeleteProducts,
 } from '../services/productService.js';
 import { createProductSchema, updateProductSchema } from '../validators/schemas.js';
+import { createError } from '../middlewares/errorHandler.js';
 
 export async function createProductController(req: Request, res: Response, next: NextFunction) {
   try {
@@ -98,6 +100,21 @@ export async function unorderProductController(req: Request, res: Response, next
       { path: 'orderedBy', select: 'email role' },
     ]);
     res.json(populated);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function bulkDeleteProductsController(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { ids } = req.body as { ids: string[] };
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      throw createError('ids must be a non-empty array', 400);
+    }
+
+    const result = await bulkDeleteProducts(ids);
+    res.json(result);
   } catch (error) {
     next(error);
   }

@@ -27,6 +27,10 @@ interface ProductGridProps {
   deleting?: boolean;
   ordering?: boolean;
   editing?: boolean;
+
+  selectable?: boolean;                    // new
+  selectedIds?: Set<string>;               // new
+  onToggleSelect?: (id: string) => void;
 }
 
 export function ProductGrid({
@@ -43,6 +47,9 @@ export function ProductGrid({
   deleting = false,
   ordering = false,
   editing = false,
+  selectable = false,
+  selectedIds = new Set(),
+  onToggleSelect,
 }: ProductGridProps) {
   if (loading) {
     return (
@@ -82,6 +89,9 @@ export function ProductGrid({
               onOrder={onOrder ? () => onOrder(product._id) : undefined}
               onUnorder={onUnorder ? () => onUnorder(product._id) : undefined}
               isLoading={deleting || ordering || editing}
+              selectable={selectable}
+              selected={selectedIds?.has(product._id)}
+              onToggleSelect={onToggleSelect ? () => onToggleSelect(product._id) : undefined}
             />
           </div>
         ))}
