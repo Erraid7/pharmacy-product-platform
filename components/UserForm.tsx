@@ -3,14 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { motion } from 'framer-motion';
-import {
-  UserPlus,
-  Mail,
-  Lock,
-  Shield,
-  Loader2,
-} from 'lucide-react';
+import { UserPlus, Mail, Lock, Shield, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -40,12 +33,7 @@ interface UserFormProps {
   isLoading?: boolean;
 }
 
-export function UserForm({
-  open,
-  onOpenChange,
-  onSubmit,
-  isLoading = false,
-}: UserFormProps) {
+export function UserForm({ open, onOpenChange, onSubmit, isLoading = false }: UserFormProps) {
   const {
     register,
     handleSubmit,
@@ -54,11 +42,7 @@ export function UserForm({
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
     mode: 'onChange',
-    defaultValues: {
-      email: '',
-      password: '',
-      role: 'worker',
-    },
+    defaultValues: { email: '', password: '', role: 'worker' },
   });
 
   const onFormSubmit = async (data: UserFormData) => {
@@ -83,39 +67,23 @@ export function UserForm({
     >
       <DialogContent className="sm:max-w-md rounded-3xl border-0 bg-white shadow-2xl">
         <DialogHeader className="space-y-4 text-center">
-          <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white shadow-lg"
-          >
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-500 to-sky-600 text-white shadow-lg">
             <UserPlus className="h-8 w-8" />
-          </motion.div>
+          </div>
 
           <div>
-            <DialogTitle className="text-2xl font-bold text-slate-900">
-              Create User
-            </DialogTitle>
-
+            <DialogTitle className="text-2xl font-bold text-slate-900">Create User</DialogTitle>
             <DialogDescription className="mt-2 text-slate-500">
               Create a new pharmacy staff account.
             </DialogDescription>
           </div>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit(onFormSubmit)}
-          className="mt-2 space-y-5"
-        >
-          {/* Email */}
-
+        <form onSubmit={handleSubmit(onFormSubmit)} className="mt-2 space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="email">
-              Email Address
-            </Label>
-
+            <Label htmlFor="email">Email Address</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
               <Input
                 id="email"
                 type="email"
@@ -126,24 +94,13 @@ export function UserForm({
                 className="h-11 rounded-xl pl-10"
               />
             </div>
-
-            {errors.email && (
-              <p className="text-sm text-red-500">
-                {errors.email.message}
-              </p>
-            )}
+            {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
           </div>
 
-          {/* Password */}
-
           <div className="space-y-2">
-            <Label htmlFor="password">
-              Password
-            </Label>
-
+            <Label htmlFor="password">Password</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
               <Input
                 id="password"
                 type="password"
@@ -154,45 +111,24 @@ export function UserForm({
                 className="h-11 rounded-xl pl-10"
               />
             </div>
-
-            {errors.password && (
-              <p className="text-sm text-red-500">
-                {errors.password.message}
-              </p>
-            )}
+            {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
           </div>
 
-          {/* Role */}
-
           <div className="space-y-2">
-            <Label htmlFor="role">
-              Account Role
-            </Label>
-
+            <Label htmlFor="role">Account Role</Label>
             <div className="relative">
               <Shield className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
-
               <select
                 id="role"
                 disabled={isLoading}
                 {...register('role')}
                 className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm font-medium text-slate-700 transition focus:border-cyan-500 focus:outline-none focus:ring-4 focus:ring-cyan-100"
               >
-                <option value="worker">
-                  👨‍⚕️ Worker
-                </option>
-
-                <option value="admin">
-                  🛡️ Administrator
-                </option>
+                <option value="worker">👨‍⚕️ Worker</option>
+                <option value="admin">🛡️ Administrator</option>
               </select>
             </div>
-
-            {errors.role && (
-              <p className="text-sm text-red-500">
-                {errors.role.message}
-              </p>
-            )}
+            {errors.role && <p className="text-sm text-red-500">{errors.role.message}</p>}
           </div>
 
           <DialogFooter className="mt-8 flex-col gap-3 sm:flex-row">

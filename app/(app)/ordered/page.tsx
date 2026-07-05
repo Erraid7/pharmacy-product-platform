@@ -5,38 +5,28 @@ import { ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '@/lib/auth-context';
-import {
-  useProducts,
-  useUnorderProduct,
-} from '@/lib/queries';
+import { useProducts, useUnorderProduct } from '@/lib/queries';
 
 import { ProductGrid } from '@/components/ProductGrid';
 import { PageHeader } from '@/components/PageHeader';
 
 export default function OrderedPage() {
   const { user } = useAuth();
-
   const { data: allProducts, isLoading } = useProducts();
-
   const unorderMutation = useUnorderProduct();
 
   const [search, setSearch] = useState('');
 
   const products = useMemo(() => {
     if (!allProducts) return [];
-
     return allProducts
       .filter((product) => product.status === 'ordered')
-      .filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      );
+      .filter((product) => product.name.toLowerCase().includes(search.toLowerCase()));
   }, [allProducts, search]);
 
   async function handleUnorder(id: string) {
     if (!confirm('Move this product back to Needed?')) return;
-
     await unorderMutation.mutateAsync(id);
-
     toast.success('Product moved back to Needed');
   }
 
@@ -44,9 +34,7 @@ export default function OrderedPage() {
     <>
       <PageHeader
         title="Ordered Products"
-        subtitle={`${products.length} ordered product${
-          products.length !== 1 ? 's' : ''
-        }`}
+        subtitle={`${products.length} ordered product${products.length !== 1 ? 's' : ''}`}
         count={products.length}
         icon={ShoppingCart}
         search={search}
@@ -60,9 +48,7 @@ export default function OrderedPage() {
         currentUser={user}
         emptyTitle="Nothing has been ordered yet"
         emptyDescription={
-          search
-            ? 'No ordered products match your search.'
-            : 'Products marked as ordered will appear here.'
+          search ? 'No ordered products match your search.' : 'Products marked as ordered will appear here.'
         }
         onUnorder={handleUnorder}
         ordering={unorderMutation.isPending}

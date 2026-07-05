@@ -1,7 +1,4 @@
-'use client';
-
 import { LucideIcon, Search } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 interface EmptyStateProps {
@@ -14,35 +11,10 @@ interface EmptyStateProps {
   };
 }
 
-export function EmptyState({
-  icon: Icon,
-  title,
-  description,
-  action,
-}: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="flex flex-col items-center justify-center py-20 text-center"
-    >
-      <div
-        className="
-          relative
-          mb-8
-          flex
-          h-24
-          w-24
-          items-center
-          justify-center
-          rounded-3xl
-          bg-gradient-to-br
-          from-cyan-50
-          to-blue-50
-          shadow-sm
-        "
-      >
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col items-center justify-center py-20 text-center">
+      <div className="relative mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-cyan-50 to-blue-50 shadow-sm">
         <div className="absolute inset-0 rounded-3xl border border-cyan-100" />
 
         {Icon ? (
@@ -54,28 +26,15 @@ export function EmptyState({
         )}
       </div>
 
-      <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-        {title}
-      </h2>
+      <h2 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h2>
 
-      <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">
-        {description}
-      </p>
+      <p className="mt-3 max-w-md text-sm leading-6 text-slate-500">{description}</p>
 
       {action && (
-        <Button
-          onClick={action.onClick}
-          className="
-            mt-8
-            rounded-xl
-            bg-cyan-600
-            px-6
-            hover:bg-cyan-700
-          "
-        >
+        <Button onClick={action.onClick} className="mt-8 rounded-xl bg-cyan-600 px-6 hover:bg-cyan-700">
           {action.label}
         </Button>
       )}
-    </motion.div>
+    </div>
   );
 }
