@@ -79,7 +79,11 @@ export async function orderProductController(req: Request, res: Response, next: 
   try {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const product = await orderProduct(id, req.user!.userId);
-    res.json(product);
+    const populated = await product?.populate([
+      { path: 'createdBy', select: 'email role' },
+      { path: 'orderedBy', select: 'email role' },
+    ]);
+    res.json(populated);
   } catch (error) {
     next(error);
   }
@@ -89,7 +93,11 @@ export async function unorderProductController(req: Request, res: Response, next
   try {
     const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const product = await unorderProduct(id);
-    res.json(product);
+    const populated = await product?.populate([
+      { path: 'createdBy', select: 'email role' },
+      { path: 'orderedBy', select: 'email role' },
+    ]);
+    res.json(populated);
   } catch (error) {
     next(error);
   }

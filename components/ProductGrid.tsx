@@ -75,7 +75,7 @@ export function ProductGrid({
           >
             <ProductCard
               product={product}
-              isOwner={product.createdBy._id === currentUser?._id}
+              isOwner={product.createdBy?._id === currentUser?._id}
               isAdmin={currentUser?.role === 'admin'}
               onDelete={onDelete ? () => onDelete(product._id) : undefined}
               onEdit={onEdit ? () => onEdit(product._id) : undefined}

@@ -52,7 +52,7 @@ export function ProductCard({
               <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
                 <span className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  {product.createdBy.email}
+                  {product.createdBy?.email ?? 'Deleted user'}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock3 className="h-4 w-4" />
