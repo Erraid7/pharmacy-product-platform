@@ -10,6 +10,11 @@ import { errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 
+// Open route to test if the server is running
+app.get('/', (req, res) => {
+  res.json({ message: 'Server is running!' });
+});
+
 app.set("trust proxy", 1);
 
 // Security middleware
