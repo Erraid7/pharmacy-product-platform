@@ -1,6 +1,7 @@
 import { UserModel } from '../models/User.js';
 import { CreateUserInput, UpdateUserInput } from '../validators/schemas.js';
 import { createError } from '../middlewares/errorHandler.js';
+import { ProductModel } from '../models/Product.js';
 
 export async function createUser(input: CreateUserInput) {
   const existingUser = await UserModel.findOne({ email: input.email });
@@ -52,11 +53,17 @@ export async function updateUser(userId: string, input: UpdateUserInput) {
 }
 
 export async function deleteUser(userId: string) {
-  const user = await UserModel.findByIdAndDelete(userId);
-  
+  const user = await UserModel.findById(userId);
   if (!user) {
     throw createError('User not found', 404);
   }
-  
+
+  // Delete every product this user created
+  await ProductModel.deleteMany({ createdBy: userId });
+  await ProductModel.deleteMany({ orderedBy: userId });
+
+
+  await UserModel.findByIdAndDelete(userId);
+
   return user.toJSON();
 }
